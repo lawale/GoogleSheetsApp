@@ -16,14 +16,15 @@ namespace GoogleSheetsApp.Services
 {
     public class GoogleSheetService : IGoogleSheetService
     {
-        private const string SpreadSheetId = "17Ah6BnPHTC8f8NxgLcw8jj4ioRpmmpljQ2DTpqp8EZo";
+        private const string SpreadSheetId = "###### <Insert Google Sheet Id Here> #####";
 
-        private readonly string ApplicationName = "Guest Information Form 2019";
+        private readonly string ApplicationName = "### <Insert Sheet Name Here> ###";
 
         private readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 
         private GoogleCredential GetCredentials()
         {
+            //Place Sheet in Root Directory
             var assembly = typeof(GoogleSheetService).GetTypeInfo().Assembly;
             var assemblyName = assembly.GetName().Name;
 
