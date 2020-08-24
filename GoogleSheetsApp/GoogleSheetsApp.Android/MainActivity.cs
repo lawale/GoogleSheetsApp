@@ -21,8 +21,6 @@ namespace GoogleSheetsApp.Droid
             base.Window.RequestFeature(WindowFeatures.ActionBar);
             base.SetTheme(Resource.Style.MainTheme);
             base.OnCreate(savedInstanceState);
-            Forms.SetFlags("RadioButton_Experimental");
-            StartBackgroundResponseUploadService();
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             Forms.Init(this, savedInstanceState);
             XF.Material.Droid.Material.Init(this, savedInstanceState);
@@ -35,16 +33,5 @@ namespace GoogleSheetsApp.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        private void StartBackgroundResponseUploadService()
-        {
-            //var task = new PeriodicTask.Builder()
-            //    .SetPeriod(1800)
-            //    .SetService(Java.Lang.Class.FromType(typeof(BackgroundService)))
-            //    .SetRequiredNetwork(0)
-            //    .SetTag("com.darthapps.googlesheetsapp")
-            //    .Build();
-
-            //GcmNetworkManager.GetInstance(this).Schedule(task);
-        }
     }
 }
