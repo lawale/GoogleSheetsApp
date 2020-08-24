@@ -2,41 +2,16 @@
 using GoogleSheetsApp.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using XF.Material.Forms.UI.Dialogs;
 using System.Windows.Input;
 using Xamarin.Forms;
-using XF.Material.Forms.UI.Dialogs.Configurations;
+using XF.Material.Forms.UI.Dialogs;
 
 namespace GoogleSheetsApp.ViewModels
 {
     public class FormsViewModel : BindableBase
     {
-        private readonly MaterialAlertDialogConfiguration alertDialogConfiguration = new MaterialAlertDialogConfiguration
-        {
-            BackgroundColor = Color.FromHex("#29357A"),
-            TitleTextColor = Color.White,
-            //TitleFontFamily = XF.Material.Forms.Material.GetResource<OnPlatform<string>>("FontFamily.Exo2Bold"),
-            MessageTextColor = Color.White.MultiplyAlpha(0.8),
-            //MessageFontFamily = XF.Material.Forms.Material.GetResource<OnPlatform<string>>("FontFamily.OpenSansRegular"),
-            TintColor = Color.White,
-            //ButtonFontFamily = XF.Material.Forms.Material.GetResource<OnPlatform<string>>("FontFamily.OpenSansSemiBold"),
-            CornerRadius = 8,
-            ScrimColor = Color.FromHex("#232F34").MultiplyAlpha(0.32),
-            ButtonAllCaps = true
-        };
-
         private readonly IDatabaseService databaseService;
         private readonly IGoogleSheetService googleSheetService;
-
-        private readonly MaterialLoadingDialogConfiguration loadingDialogConfiguration = new MaterialLoadingDialogConfiguration()
-        {
-            BackgroundColor = Color.FromHex("#29357A"),
-            MessageTextColor = Color.White.MultiplyAlpha(0.8),
-            //MessageFontFamily = XF.Material.Forms.Material.GetResource<OnPlatform<string>>("FontFamily.OpenSansRegular"),
-            TintColor = Color.White,
-            CornerRadius = 8,
-            ScrimColor = Color.FromHex("#232F34").MultiplyAlpha(0.32)
-        };
 
         private UserResponse response;
         public FormsViewModel()
@@ -69,13 +44,13 @@ namespace GoogleSheetsApp.ViewModels
         {
             if (Count < 1)
             {
-                await MaterialDialog.Instance.AlertAsync("You do not have any unsent responses.", "Error", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("You do not have any unsent responses.", "Error");
                 return false;
             }
 
             if (Xamarin.Essentials.Connectivity.NetworkAccess != Xamarin.Essentials.NetworkAccess.Internet)
             {
-                await MaterialDialog.Instance.AlertAsync("No internet access. Please retry when you have internet connection.", "Error", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("No internet access. Please retry when you have internet connection.", "Error");
                 return false;
             }
 
@@ -87,7 +62,7 @@ namespace GoogleSheetsApp.ViewModels
             Response.Validate("Email");
             if (response.HasErrors)
             {
-                await MaterialDialog.Instance.AlertAsync("You haven't filled the form.", "Error", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("You haven't filled the form.", "Error");
                 return false;
             }
 
@@ -102,7 +77,7 @@ namespace GoogleSheetsApp.ViewModels
 
         private async Task HandleResponseSubmitRetryAsync()
         {
-            var shouldRetry = await MaterialDialog.Instance.ConfirmAsync("Your response was unable to deliver. You can retry now or schedule it for a later time", "Error", "RETRY", "SCHEDULE LATER", alertDialogConfiguration);
+            var shouldRetry = await MaterialDialog.Instance.ConfirmAsync("Your response was unable to deliver. You can retry now or schedule it for a later time", "Error", "RETRY", "SCHEDULE LATER");
             if (shouldRetry.HasValue && shouldRetry.Value)
             {
                 var result = await googleSheetService.AddDataAsync(response.ToFormsData());
@@ -111,7 +86,7 @@ namespace GoogleSheetsApp.ViewModels
                     await HandleSaveResponseForRetryAsync(true);
                     return;
                 }
-                await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success");
                 Response = new UserResponse();
                 return;
             }
@@ -121,9 +96,9 @@ namespace GoogleSheetsApp.ViewModels
         private async Task HandleSaveResponseForRetryAsync(bool wasRetried)
         {
             if (wasRetried)
-                await MaterialDialog.Instance.AlertAsync("Error submitting response. Response will be delivered later.", "Error", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("Error submitting response. Response will be delivered later.", "Error");
             else
-                await MaterialDialog.Instance.AlertAsync("Your Response will be submitted later.", "Error", alertDialogConfiguration);
+                await MaterialDialog.Instance.AlertAsync("Your Response will be submitted later.", "Error");
 
             await databaseService.SaveResponseAsync(Response);
             await LoadUnsentResponsesAsync();
@@ -140,7 +115,7 @@ namespace GoogleSheetsApp.ViewModels
 
             string result;
             var value = new List<IList<object>>();
-            using (await MaterialDialog.Instance.LoadingDialogAsync("Submitting your response...", loadingDialogConfiguration))
+            using (await MaterialDialog.Instance.LoadingDialogAsync("Submitting your response..."))
             {   
                 foreach(var r in UnsubmittedResponses)
                 {
@@ -154,7 +129,7 @@ namespace GoogleSheetsApp.ViewModels
                 await HandleResponseSubmitRetryAsync();
             }
 
-            await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success", alertDialogConfiguration);
+            await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success");
             Parallel.ForEach(UnsubmittedResponses, x => x.HasBeenSubmitted = true);
             
             await databaseService.UpdateResponsesAsync(UnsubmittedResponses);
@@ -164,7 +139,7 @@ namespace GoogleSheetsApp.ViewModels
 
         private async Task SaveResponseInDbAsync()
         {
-            await MaterialDialog.Instance.AlertAsync("No internet access. Your Response will be delivered later.", "Error", alertDialogConfiguration);
+            await MaterialDialog.Instance.AlertAsync("No internet access. Your Response will be delivered later.", "Error");
             await databaseService.SaveResponseAsync(Response);
             await LoadUnsentResponsesAsync();
         }
@@ -173,7 +148,7 @@ namespace GoogleSheetsApp.ViewModels
             if (! await EnsureValidationsAsync()) return;
 
             string result;
-            using (await MaterialDialog.Instance.LoadingDialogAsync("Submitting your response", loadingDialogConfiguration))
+            using (await MaterialDialog.Instance.LoadingDialogAsync("Submitting your response"))
             {
                  result = await googleSheetService.AddDataAsync(response.ToFormsData());
             }
@@ -184,7 +159,7 @@ namespace GoogleSheetsApp.ViewModels
                 return;
             }
 
-            await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success", alertDialogConfiguration);
+            await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success");
             Response = new UserResponse();
             return;
         }
