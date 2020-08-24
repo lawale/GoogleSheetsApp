@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             BackgroundColor="White"
+             xmlns:material="clr-namespace:XF.Material.Forms.UI;assembly=XF.Material"
+             material:MaterialNavigationPage.AppBarColor="#29357A"
+             material:MaterialNavigationPage.StatusBarColor="#151C49"
+             xmlns:behavior="clr-namespace:GoogleSheetsApp.Validations"
+             xmlns:converters="clr-namespace:GoogleSheetsApp.Converters"
+             xmlns:viewModel="clr-namespace:GoogleSheetsApp.ViewModels"
+             mc:Ignorable="d"
+             x:Class="GoogleSheetsApp.Views.FormsPage">
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="5,0">
+            <Label HorizontalOptions="StartAndExpand" BackgroundColor="Transparent" TextColor="Transparent" />
+            <material:MaterialChip BackgroundColor="White"  Text="{Binding Count,StringFormat='{0} Unsent'}" TextColor="#29357A" HorizontalOptions="End" >
+                <material:MaterialChip.GestureRecognizers>
+                    <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding RetryCommand}" />
+                </material:MaterialChip.GestureRecognizers>
+            </material:MaterialChip>
+        </StackLayout>
+    </NavigationPage.TitleView>
+    <ContentPage.BindingContext>
+        <viewModel:FormsViewModel />
+    </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <Style TargetType="material:MaterialTextField">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="FloatingPlaceholderEnabled" Value="True" />
+            <Setter Property="TintColor" Value="#29357A" />
+            <Setter Property="ErrorColor" Value="IndianRed" />
+            <Setter Property="AlwaysShowUnderline" Value="True" />
+            <Setter Property="PlaceholderColor" Value="LightGray" />
+            <Setter Property="TextColor" Value="Black" />
+            <Setter Property="UnderlineColor" Value="LightGray" />
+            <Setter Property="HelperTextColor" Value="IndianRed" />
+            <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+        </Style>
+
+        <converters:IsSubscribedBoolConverter x:Key="isSubscribedConv" />
+    </ContentPage.Resources>
+    
+    <ContentPage.Content>
+        <ScrollView Padding="20" VerticalScrollBarVisibility="Always">
+            <StackLayout Spacing="20">
+                <material:MaterialLabel HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" Text="Guest Information Form" TextColor="Black" TypeScale="H6" BackgroundColor="White" />
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding Email, Mode=TwoWay}" Placeholder="Email Address" ReturnType="Next" InputType="Email" ErrorText="Input a valid Email Address" HasError="{Binding EmailHasError}" HelperText="*">
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="Email" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding LastName, Mode=TwoWay}" Placeholder="Last Name" ErrorText="Your last name is required" HasError="{Binding LastNameHasError}" InputType="Text" ReturnType="Next" HelperText="*">
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="LastName" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding FirstName, Mode=TwoWay}" ErrorText="Your first name is required" Placeholder="First Name" HasError="{Binding FirstNameHasError}" InputType="Text" ReturnType="Next" HelperText="*">
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="FirstName" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding PhoneNumber, Mode=TwoWay}" Placeholder="Phone Number" InputType="Telephone" ReturnType="Next" >
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="PhoneNumber" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding Address, Mode=TwoWay}" Placeholder="Address" InputType="Text" ReturnType="Next" >
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="Address" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox BindingContext="{Binding Response}" IsChecked="{Binding IsSubscribed, Converter={StaticResource isSubscribedConv}, Mode=TwoWay}" VerticalOptions="Center" Color="#29357A" />
+                    <material:MaterialLabel TypeScale="Body1" Text="Subscribe to Monthly Newsletter" TextColor="Black" VerticalOptions="Center" />
+                </StackLayout>
+
+                <material:MaterialTextField BindingContext="{Binding Response}" Text="{Binding Notes, Mode=TwoWay}" Placeholder="Notes" InputType="Text" >
+                    <material:MaterialTextField.Behaviors>
+                        <behavior:EntryBehaviour PropertyName="Notes" />
+                    </material:MaterialTextField.Behaviors>
+                </material:MaterialTextField>
+
+                <material:MaterialButton HorizontalOptions="End" Text="Submit" BackgroundColor="#29357A" Command="{Binding SubmitCommand}" />
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
