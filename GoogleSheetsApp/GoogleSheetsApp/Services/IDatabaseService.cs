@@ -6,6 +6,7 @@ namespace GoogleSheetsApp.Services
 {
     public interface IDatabaseService
     {
+        Task<int> GetUnsubmittedResponsesCountAsync();
         Task InitializeServiceAsync();
         Task<IList<UserResponse>> RetrieveUnsubmittedResponseAsync();
         Task<int> SaveResponseAsync(UserResponse response);

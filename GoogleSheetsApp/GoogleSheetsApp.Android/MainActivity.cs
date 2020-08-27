@@ -1,12 +1,9 @@
-﻿using System;
-
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
+using Android.OS;
 using Android.Runtime;
 using Android.Views;
-using Android.Widget;
-using Android.OS;
-using Android.Gms.Gcm;
+using Matcha.BackgroundService.Droid;
 using Xamarin.Forms;
 
 namespace GoogleSheetsApp.Droid
@@ -23,6 +20,7 @@ namespace GoogleSheetsApp.Droid
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             Forms.Init(this, savedInstanceState);
+            BackgroundAggregator.Init(this);
             XF.Material.Droid.Material.Init(this, savedInstanceState);
             LoadApplication(new App());
         }

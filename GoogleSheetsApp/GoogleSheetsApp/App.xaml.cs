@@ -1,4 +1,6 @@
-﻿using GoogleSheetsApp.Views;
+﻿using GoogleSheetsApp.Services;
+using GoogleSheetsApp.Views;
+using Matcha.BackgroundService;
 using Xamarin.Forms;
 using XF.Material.Forms;
 using XF.Material.Forms.UI;
@@ -45,16 +47,17 @@ namespace GoogleSheetsApp
         protected override void OnStart()
         {
             // Handle when your app starts
+            BackgroundAggregatorService.Add(() => new BackgroundRetryService());
         }
 
         protected override void OnSleep()
         {
-            // Handle when your app sleeps
+            BackgroundAggregatorService.StartBackgroundService();
         }
 
         protected override void OnResume()
         {
-            // Handle when your app resumes
+            BackgroundAggregatorService.StopBackgroundService();
         }
     }
 }

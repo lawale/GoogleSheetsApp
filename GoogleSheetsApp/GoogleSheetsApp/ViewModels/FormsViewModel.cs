@@ -12,20 +12,26 @@ namespace GoogleSheetsApp.ViewModels
     {
         private readonly IDatabaseService databaseService;
         private readonly IGoogleSheetService googleSheetService;
+        private readonly IResponseRetryService responseRetryService;
 
         private UserResponse response;
         public FormsViewModel()
         {
             Response = new UserResponse();
-            UnsubmittedResponses = new List<UserResponse>();
-            SubmitCommand = new Command(async () => await SubmitResponseAsync());
-            RetryCommand = new Command(async () => await ResubmitResponsesAsync());
-            LoadCommand = new Command(async () => await LoadUnsentResponsesAsync());
             databaseService = DependencyService.Get<IDatabaseService>();
             googleSheetService = DependencyService.Get<IGoogleSheetService>();
+            responseRetryService = DependencyService.Get<IResponseRetryService>();
+            RetryCommand = new Command(async () => await ResubmitResponsesAsync());
+            SubmitCommand = new Command(async () => await SubmitResponseAsync());
+            LoadCommand = new Command(async () => await LoadUnsentResponsesAsync());
         }
 
-        public int Count => UnsubmittedResponses.Count;
+        private int count;
+        public int Count
+        {
+            get => count;
+            set => SetProperty(ref count, value);
+        }
 
         public ICommand LoadCommand { get; }
 
@@ -35,11 +41,11 @@ namespace GoogleSheetsApp.ViewModels
 
             get => response;
         }
+
         public ICommand RetryCommand { get; }
 
         public ICommand SubmitCommand { get; }
 
-        public IList<UserResponse> UnsubmittedResponses { get; private set; }
         private async Task<bool> CheckForUnsentResponsesAsync()
         {
             if (Count < 1)
@@ -104,37 +110,26 @@ namespace GoogleSheetsApp.ViewModels
             await LoadUnsentResponsesAsync();
         }
 
-        private async Task LoadUnsentResponsesAsync()
-        {
-            UnsubmittedResponses = await databaseService.RetrieveUnsubmittedResponseAsync();
-            RaisePropertyChanged(nameof(Count));
-        }
+        private async Task LoadUnsentResponsesAsync() => Count = await databaseService.GetUnsubmittedResponsesCountAsync();
+
         private async Task ResubmitResponsesAsync()
         {
             if (!await CheckForUnsentResponsesAsync()) return;
+            bool response;
 
-            string result;
-            var value = new List<IList<object>>();
             using (await MaterialDialog.Instance.LoadingDialogAsync("Submitting your response..."))
-            {   
-                foreach(var r in UnsubmittedResponses)
-                {
-                    value.Add(r.ToFormsSingleData());
-                }
-                result = await googleSheetService.AddDataAsync(value);
+            {
+                response = await responseRetryService.ExecuteAsync();
             }
 
-            if (string.IsNullOrEmpty(result))
+            if (!response)
             {
-                await HandleResponseSubmitRetryAsync();
+                await MaterialDialog.Instance.AlertAsync("Unable to Submit Response. Submission will be retried later", "Success");
+                return;
             }
 
             await MaterialDialog.Instance.AlertAsync("Your response has being submitted.", "Success");
-            Parallel.ForEach(UnsubmittedResponses, x => x.HasBeenSubmitted = true);
-            
-            await databaseService.UpdateResponsesAsync(UnsubmittedResponses);
             await LoadUnsentResponsesAsync();
-            return;
         }
 
         private async Task SaveResponseInDbAsync()

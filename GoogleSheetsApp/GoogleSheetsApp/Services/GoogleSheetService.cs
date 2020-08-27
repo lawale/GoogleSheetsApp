@@ -33,10 +33,8 @@ namespace GoogleSheetsApp.Services
 
             if (!doesExist) return null;
 
-            using (var stream = assembly.GetManifestResourceStream($"{assemblyName}.credentials.json"))
-            {
-                return GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-            }
+            using var stream = assembly.GetManifestResourceStream($"{assemblyName}.credentials.json");
+            return GoogleCredential.FromStream(stream).CreateScoped(Scopes);
         }
 
         private SheetsService IntializeSheetConnection()
@@ -62,22 +60,20 @@ namespace GoogleSheetsApp.Services
                 Values = data
             };
 
-            using (var sheetsService = IntializeSheetConnection())
+            using var sheetsService = IntializeSheetConnection();
+            AppendValuesResponse response;
+            try
             {
-                AppendValuesResponse response;
-                try
-                {
-                    var request = sheetsService.Spreadsheets.Values.Append(dataValueRange, SpreadSheetId, range);
-                    request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
-                    response = await request.ExecuteAsync();
-                }
-                catch
-                {
-                    return null;
-                }
-
-                return JsonConvert.SerializeObject(response);
+                var request = sheetsService.Spreadsheets.Values.Append(dataValueRange, SpreadSheetId, range);
+                request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                response = await request.ExecuteAsync();
             }
+            catch
+            {
+                return null;
+            }
+
+            return JsonConvert.SerializeObject(response);
 
 
         }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Foundation;
+﻿using Foundation;
+using Matcha.BackgroundService.iOS;
 using UIKit;
 
 namespace GoogleSheetsApp.iOS
@@ -24,6 +21,7 @@ namespace GoogleSheetsApp.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             XF.Material.iOS.Material.Init();
+            BackgroundAggregator.Init(this);
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);

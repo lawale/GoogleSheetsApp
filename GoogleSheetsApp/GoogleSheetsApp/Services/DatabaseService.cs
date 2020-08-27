@@ -11,9 +11,10 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(DatabaseService))]
 namespace GoogleSheetsApp.Services
 {
-    public class DatabaseService : IDatabaseService
+    public class DatabaseService : IDatabaseService, IAsyncDisposable, IDisposable
     {
         private SQLiteAsyncConnection database;
+        private bool disposedValue;
 
         private static string GetDbLocation(string db = "Responses.db3") => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), db);
 
@@ -39,6 +40,12 @@ namespace GoogleSheetsApp.Services
             return await database.UpdateAsync(response);
         }
 
+        public async Task<int> GetUnsubmittedResponsesCountAsync()
+        {
+            await InitializeServiceAsync();
+            return await database.Table<UserResponse>().CountAsync();
+        }
+
 
         public async Task<IList<UserResponse>> RetrieveUnsubmittedResponseAsync()
         {
@@ -52,6 +59,36 @@ namespace GoogleSheetsApp.Services
             return await database.UpdateAllAsync(responses);
         }
 
+        private async ValueTask DisposeAsyncCore()
+        {
+            await database.CloseAsync();
+            database = null;
+        }
 
+        public async ValueTask DisposeAsync()
+        {
+            await DisposeAsyncCore();
+            Dispose(disposing: false);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    database?.CloseAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
